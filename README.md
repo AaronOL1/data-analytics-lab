@@ -1,2 +1,8 @@
-# data-analytics-lab
-Daily sandbox for coding practice. Tracking my progress in SQL, Excel, and Power BI on the path to becoming a Senior Data Analyst.
+# Data Analytics Lab
+
+## Author: AaronOL
+**Role:** Data Analyst / Economist
+
+## Repository Purpose
+This repository documents my daily progress in Data Analytics.
+Stack: SQL (SSMS), Python, Excel.
