@@ -13,8 +13,10 @@ This folder contains multiple projects simulating real-world business scenarios.
 * **03_school_analytics.sql**: Business logic, financial reporting, and KPI analysis using JOINS.
 * **02_school_ERD.png**: Entity-Relationship Diagram.
 
-### 2. 🏥 Project: Clinic Management (Coming Soon)
-**Focus:** Complex JOINS, Date functions, and Patient Flow Analysis.
+### 2. 🏥 Project: Clinic Management (In Progress)
+**Focus:** Complex JOINS, Normalization, and Patient Flow Analysis.
+* **04_clinic_schema.sql**: Database structure (generated via Reverse Engineering).
+* **04_clinic_ERD.png**: Logical Database Diagram.
 
 ### 3. 🛒 Project: Retail & Inventory (Coming Soon)
 **Focus:** Sales analysis, Stock management, and Profitability KPIs.
