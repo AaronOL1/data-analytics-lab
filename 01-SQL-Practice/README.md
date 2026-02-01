@@ -1,26 +1,31 @@
 # 🗄️ SQL Practice Laboratory
 
-Welcome to my central repository for SQL training. Here I document my progression from basic queries to advanced data architecture and analysis.
+Welcome to my central repository for SQL training. Here I document my progression from basic syntax drills to complex business case studies.
 
 ## 📂 Repository Contents
 
-This folder contains multiple projects simulating real-world business scenarios.
+### 1. 🎓 Course Exercises & Drills
+**Focus:** Syntax mastery, snippets, and class notes (Google & CEC-EPN).
+* Contains dedicated scripts for specific SQL commands and logic tests learned during lectures.
+* *Sandbox environment for testing new concepts before applying them to projects.*
 
-### 1. 🏗️ Project: School Management System (Finished)
+### 2. 🏗️ Project: School Management System (Finished)
 **Focus:** Database Architecture (DDL) & Business Reporting (DQL).
-* **01_setup_test.sql**: Environment configuration.
-* **02_school_schema-setup.sql**: Full database creation (Tables, Constraints, Relationships).
+* **01_school_ERD.png**: Logical Entity-Relationship Diagram.
+* **02_school_schema-setup.sql**: Full database creation (Tables, Constraints, Keys).
 * **03_school_analytics.sql**: Business logic, financial reporting, and KPI analysis using JOINS.
-* **02_school_ERD.png**: Entity-Relationship Diagram.
 
-### 2. 🏥 Project: Clinic Management (In Progress)
-**Focus:** Complex JOINS, Normalization, and Patient Flow Analysis.
-* **04_clinic_schema.sql**: Database structure (generated via Reverse Engineering).
-* **04_clinic_ERD.png**: Logical Database Diagram.
-**05_clinic_queries_part1.sql**: Analysis script with 10 queries. Covers multi-table JOINs, Aggregations, and Subqueries (Scalar & IN).
+### 3. 🏥 Project: Clinic Management (Finished)
+**Focus:** End-to-End Analysis (Google Methodology), Strategic Reporting, and Operational Efficiency.
+* **01_clinic_ERD.png**: Logical Database Diagram.
+* **02_clinic_schema.sql**: Database structure and table creation.
+* **03_clinic_queries_part1.sql**: Preliminary data exploration and multi-table JOINs.
+* **04_clinic_case_study.sql**: ⭐️ **Full Business Case Study**. 
+    * Applied the **Google Data Analytics Framework** (Ask, Prepare, Process, Analyze, Share).
+    * Delivered strategic recommendations regarding staffing bottlenecks (Single Point of Failure) and demographic marketing pivots.
 
-### 3. 🛒 Project: Retail & Inventory (Coming Soon)
-**Focus:** Sales analysis, Stock management, and Profitability KPIs.
+### 4. 🛒 Project: Supermarket Retail (Coming Soon)
+**Focus:** Sales analysis, inventory management, and profitability KPIs.
 
 ---
 
@@ -28,5 +33,3 @@ This folder contains multiple projects simulating real-world business scenarios.
 * **Language:** SQL (T-SQL)
 * **Environment:** SQL Server Management Studio (SSMS)
 * **Version Control:** Git & GitHub
-
-**Author:** Aaron Olmedo
