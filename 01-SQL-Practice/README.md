@@ -17,6 +17,7 @@ This folder contains multiple projects simulating real-world business scenarios.
 **Focus:** Complex JOINS, Normalization, and Patient Flow Analysis.
 * **04_clinic_schema.sql**: Database structure (generated via Reverse Engineering).
 * **04_clinic_ERD.png**: Logical Database Diagram.
+**05_clinic_queries_part1.sql**: Analysis script with 10 queries. Covers multi-table JOINs, Aggregations, and Subqueries (Scalar & IN).
 
 ### 3. 🛒 Project: Retail & Inventory (Coming Soon)
 **Focus:** Sales analysis, Stock management, and Profitability KPIs.
