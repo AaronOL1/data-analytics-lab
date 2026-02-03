@@ -26,7 +26,9 @@ Welcome to my central repository for SQL training. Here I document my progressio
 
 ### 4. 🛒 Project: Supermarket Retail (Coming Soon)
 **Focus:** Sales analysis, inventory management, and profitability KPIs.
-
+* **01_supermarket_ERD.png**: Logical Database Diagram.
+* **02_supermarket_full_database.sql**: Complete database script (Creates tables & Inserts mock data).
+* *Status: Ready for Analysis queries.*
 ---
 
 ### 🛠 Tech Stack
