@@ -24,11 +24,12 @@ Welcome to my central repository for SQL training. Here I document my progressio
     * Applied the **Google Data Analytics Framework** (Ask, Prepare, Process, Analyze, Share).
     * Delivered strategic recommendations regarding staffing bottlenecks (Single Point of Failure) and demographic marketing pivots.
 
-### 4. 🛒 Project: Supermarket Retail (Coming Soon)
+### 4. 🛒 Project: Supermarket Retail (Setup)
+**Location:** `./04_Case_SuperMarket/`
 **Focus:** Sales analysis, inventory management, and profitability KPIs.
-* **01_supermarket_ERD.png**: Logical Database Diagram.
-* **02_supermarket_full_database.sql**: Complete database script (Creates tables & Inserts mock data).
-* *Status: Ready for Analysis queries.*
+* **01.Supermarket_ERD.png**: Logical Database Diagram.
+* **02_supermarket_full_database.sql**: Complete database script (Schema + Data).
+* *Status: Ready for Analysis.*
 ---
 
 ### 🛠 Tech Stack
