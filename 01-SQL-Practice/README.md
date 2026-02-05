@@ -29,7 +29,9 @@ Welcome to my central repository for SQL training. Here I document my progressio
 **Focus:** Sales analysis, inventory management, and profitability KPIs.
 * **01.Supermarket_ERD.png**: Logical Database Diagram.
 * **02_supermarket_full_database.sql**: Complete database script (Schema + Data).
-* *Status: Ready for Analysis.*
+* **03_supermarket_business_kpis.sql**: ⭐️ **Full Analysis Script**.
+    * Includes: Data Quality checks, Revenue calculation, Average Ticket, and Category Share.
+* *Status: Analyzing Business KPIs.*
 ---
 
 ### 🛠 Tech Stack
