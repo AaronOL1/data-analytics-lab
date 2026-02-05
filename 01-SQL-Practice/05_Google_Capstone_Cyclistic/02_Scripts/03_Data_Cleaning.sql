@@ -29,8 +29,10 @@ CREATE TABLE Cyclistic_Final (
     start_station_id NVARCHAR(50),
     end_station_name NVARCHAR(MAX),
     end_station_id NVARCHAR(50),
-    start_lat FLOAT,                  -- Real Number
-    start_lng FLOAT,                  -- Real Number
+    start_lat FLOAT,                  
+    start_lng FLOAT,
+    end_lat FLOAT,      
+    end_lng FLOAT,       
     member_casual NVARCHAR(50),
     
     -- Extra Calculation Columns (Required by Case Study)
@@ -53,6 +55,8 @@ INSERT INTO Cyclistic_Final (
     end_station_id,
     start_lat,
     start_lng,
+    end_lat,
+    end_lng,
     member_casual,
     ride_length_minutes,
     day_of_week
@@ -69,6 +73,8 @@ SELECT
     REPLACE(end_station_id, '"', ''),
     CAST(REPLACE(start_lat, '"', '') AS FLOAT),
     CAST(REPLACE(start_lng, '"', '') AS FLOAT),
+    CASE WHEN REPLACE(end_lat, '"', '') = '' THEN NULL ELSE CAST(REPLACE(end_lat, '"', '') AS FLOAT) END,
+    CASE WHEN REPLACE(end_lng, '"', '') = '' THEN NULL ELSE CAST(REPLACE(end_lng, '"', '') AS FLOAT) END,
     REPLACE(member_casual, '"', ''),
     DATEDIFF(MINUTE,CAST(REPLACE(started_at, '"', '') AS DATETIME2), 
         CAST(REPLACE(ended_at, '"', '') AS DATETIME2)), -- Calculate Ride Length (minutes) automatically

@@ -37,6 +37,8 @@ CREATE TABLE All_Trips (
     end_station_id NVARCHAR(255),
     start_lat NVARCHAR(255),         -- Stored as text
     start_lng NVARCHAR(255),         -- Stored as text
+    end_lat NVARCHAR(255),
+    end_lng NVARCHAR(255),
     member_casual NVARCHAR(255)
 );
 GO
