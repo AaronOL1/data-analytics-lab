@@ -152,19 +152,146 @@ SELECT REPLACE (var1, '-','') FROM Tabla_Maestra; -- '-' se puede cambiar por cu
 --  "      RIGTH(var1,4) "       "     ; -- Seleciona los 4 caracteres de la DERECHA
 --  SELECT SUBSTRING(Columna, POSICION_INICIAL, LONGITUD)
 -- Ejemplo SUBSTRING- 
-
+SELECT SUBSTRING('ABC-123-XYZ', 5, 3); -- Desde la posición 5 selecciona 3 valores.
+                                       -- RESULTADO: 123
+--**BONUS** 
+-- CHARINDEX (Rastreador) - Cuando no sabes la posisión exacta
+SELECT CHARINDEX('-', 'ABC-123-XYZ') -- Busca donde esta el '-'
+                                     -- RESULTADO 4
 
 ---------------------------------------------------------------------------
---3.4 ESTANDARIZACIÓN LÓGICA (CASE WHEN)
--- Arreglar categorías mal escritas o inconsistentes.
--- ==========================================================================
+-- 3. ESTANDARIZACIÓN (Arreglar categorías mal escritas o inconsistentes)
 
--- Supongamos que en 'member_casual' tienes: 'm', 'M', 'Member', 'Subscriber'.
+-- Supongamos que en 'var1' tienes: 'm', 'M', 'Member', 'Subscriber'.
 -- Queremos estandarizar todo a solo 'Member' y 'Casual'.
 
 UPDATE Tabla_Maestra
-SET member_casual = CASE 
-    WHEN member_casual IN ('m', 'M', 'Subscriber') THEN 'Member'
-    WHEN member_casual IN ('c', 'C', 'Customer') THEN 'Casual'
-    ELSE member_casual -- Si ya está bien, déjalo igual
+SET var1 = CASE 
+    WHEN var1 IN ('m', 'M', 'Subscriber') THEN 'Member'
+    WHEN var1 IN ('c', 'C', 'Customer') THEN 'Casual'
+    ELSE var1 -- Si ya está bien, déjalo igual
 END;
+
+---------------------------------------------------------------------------
+-- 4. VALIDACIÓN DE DATOS (Revisar que los números tengan sentido)
+-- A) LÓGICA NUMÉRICA (Precios, Edades, Cantidades)
+-- 1. Negativos Imposibles: ¿Precios, edad o inventario bajo cero?
+
+SELECT * FROM Tabla_Ventas 
+WHERE precio < 0 OR cantidad < 0;
+
+-- 2. Ceros Sospechosos: ¿Ventas de $0? (A veces es regalo, a veces error)
+
+SELECT * FROM Tabla_Ventas WHERE monto_total = 0;
+
+-- 3. Outliers (Valores Extremos): ¿Alguien tiene 150 años? ¿Un salario de 1 billón?
+
+SELECT * FROM Tabla_Empleados 
+WHERE edad > 100 
+   OR salario > 1000000; -- Ajusta el umbral a tu negocio
+
+-- B) COHERENCIA TEMPORAL (Time Travel Logic)
+-- 1. El fin ocurre antes del inicio 
+
+SELECT * FROM Tabla_Logistica
+WHERE fecha_entrega < fecha_pedido;
+
+-- 2. Datos mayores a HOY
+
+SELECT * FROM Tabla_Usuarios
+WHERE fecha_registro > GETDATE(); -- GETDATE() es 'Ahora mismo'
+
+-- 3. Viajeros del Pasado (Datos demasiado viejos)
+
+SELECT * FROM Tabla_Usuarios
+WHERE YEAR(fecha_nacimiento) < 1920;
+
+
+-- C) PATRONES DE TEXTO Y FORMATO 
+-- 1. Longitud Incorrecta (LEN)
+-- Ej: Un RUC 13 dígitos.
+
+SELECT * FROM Tabla_Clientes
+WHERE LEN(RUC) <> 13;
+
+-- 2. Falta de Caracteres Clave (LIKE)
+
+SELECT * FROM Tabla_Contactos
+WHERE email NOT LIKE '%@%';
+
+-- 3. Espacios Invisibles (DATALENGTH vs LEN)
+
+SELECT columna, LEN(columna) as Longitud_Visible, DATALENGTH(columna) as Bytes_Reales
+FROM Tabla_Maestra
+WHERE LEN(columna) <> DATALENGTH(columna); 
+-- **Nota: En NVARCHAR esto varía, usar con cuidado.
+
+-- D) CONSISTENCIA ENTRE COLUMNAS (Cross-Column Logic) 🕵️‍♂️
+-- 1. Estado vs. Fecha - Dice 'Entregado' pero la fecha de entrega es NULA. ¡Contradicción!
+
+SELECT * FROM Tabla_Pedidos
+WHERE estado = 'Entregado' AND fecha_entrega IS NULL;
+
+-- 2. Categoría vs. Valor
+-- Ej: El tipo de cliente es 'VIP' pero sus compras son 0.
+
+SELECT * FROM Tabla_Clientes
+WHERE tipo_cliente = 'VIP' AND total_compras < 100;
+
+---------------------------------------------------------------------------
+/*
+FASE 4: ANÁLISIS, MATEMÁTICAS Y AGREGACIÓN
+"El Taller de Operaciones". Aquí transformamos filas en respuestas.
+
+Para que el código funcione en tu cabeza, asume que tenemos esta tabla imaginaria:
+
+Tabla_General: Tu tabla de datos.
+col_categ: Una columna de texto/categoría (Ej: País, Producto, Tipo de Cliente).
+col_num_A: Una métrica numérica (Ej: Ventas, Ingresos, Distancia).
+col_num_B: Otra métrica numérica (Ej: Costos, Gastos, Tiempo).
+col_fecha: Una fecha (Ej: Fecha de Transacción).
+*/
+---------------------------------------------------------------------------
+-- A. MATEMÁTICAS DE FILA (peraciones entre columnas de la MISMA fila. No agrupan, solo calculan.)
+SELECT
+    col_categ,
+    (col_num_A + col_num_B) AS resultado_suma,           --SUMA simple
+    (col_num_A - col_num_B) AS resultado_resta,          --RESTA simple
+    (col_num_A * col_num_B) AS resultado_multiplicacion, 
+    (col_num_A * 1.0 / col_num_B) AS resultado_division  --IMPORTANTE: Multiplicar por 1.0 para evitar división entera (que trunca decimales)
+FROM Tabla_General;
+
+-- B. AGREGACIONES BÁSICAS (The Big 5)
+-- Resumir miles de filas en un solo número. Requiere GROUP BY si hay texto.
+
+SELECT 
+    
+    -- 1. CONTEO (Frecuencia)
+    COUNT(*) AS total_filas,           -- Cuenta todo (*) (incluye nulos)
+    COUNT(col_num_A) AS total_validos, -- Cuenta solo valores reales (ignora nulos)
+    
+    -- 2. SUMA (Totales)
+    SUM(col_num_A) AS total_acumulado,
+    
+    -- 3. PROMEDIO 
+    AVG(col_num_A) AS promedio,
+    
+    -- 4. RANGO (Extremos)
+    MIN(col_num_A) AS valor_minimo,
+    MAX(col_num_A) AS valor_maximo,
+
+    -- 5. DESVIACIÓN ESTÁNDAR (Para ver qué tan dispersos están los datos)
+    STDEV(col_num_A) AS variabilidad
+
+FROM Tabla_General
+GROUP BY col_categ;
+
+-- C. FÓRMULAS AVANZADAS Y KIPs
+
+SELECT
+    -- A) EL PORCENTAJE DEL TOTAL (Share of Total)
+    --Fórmula: (Suma de la Categoría / Suma de TODA la tabla) * 100
+    
+    ROUND(SUM(col_num_A) * 100.0 / (SELECT SUM(col_num_A)FROM Tabla_General), 2)  
+    -- Lógica: Usamos una subconsulta para sacar el denominador global.
+    AS porcentaje_del_mercado,
