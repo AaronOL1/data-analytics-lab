@@ -261,6 +261,7 @@ SELECT
     (col_num_A * 1.0 / col_num_B) AS resultado_division  --IMPORTANTE: Multiplicar por 1.0 para evitar división entera (que trunca decimales)
 FROM Tabla_General;
 
+------------------------------------------------------------------------------
 -- B. AGREGACIONES BÁSICAS (The Big 5)
 -- Resumir miles de filas en un solo número. Requiere GROUP BY si hay texto.
 
@@ -286,6 +287,7 @@ SELECT
 FROM Tabla_General
 GROUP BY col_categ;
 
+--------------------------------------------------------------------------
 -- C. FÓRMULAS AVANZADAS Y KIPs
 
 SELECT
@@ -295,3 +297,130 @@ SELECT
     ROUND(SUM(col_num_A) * 100.0 / (SELECT SUM(col_num_A)FROM Tabla_General), 2)  
     -- Lógica: Usamos una subconsulta para sacar el denominador global.
     AS porcentaje_del_mercado,
+
+    -- B) TICKET PROMEDIO (Average Order Value)
+    -- Fórmula: Suma Total / Cantidad de Transacciones
+    SUM(col_num_A) / COUNT(col_categ) AS valor_promedio_real,
+
+    -- C) MARGEN DE GANANCIA (Profit Margin)
+    -- Fórmula: (Ventas - Costos) / Ventas
+    (SUM(col_num_A) - SUM(col_num_B)) / NULLIF(SUM(col_num_A), 0) AS margen_rentabilidad}
+        -- **Nota: Usamos NULLIF para evitar el error de "División por Cero".
+
+FROM Tabla_General
+GROUP BY col_categ;
+
+-------------------------------------------------------------------------------
+-- D. SEGMENTACIÓN LÓGICA (Crear nuevas etiquetas basadas en reglas de negocio)
+
+SELECT 
+    col_categ,
+    col_num_A,
+    
+    CASE 
+        -- Caso 1: Rango Alto
+        WHEN col_num_A > 1000 THEN 'Categoría Alta / VIP'
+        
+        -- Caso 2: Rango Medio (Entre valores)
+        WHEN col_num_A BETWEEN 500 AND 1000 THEN 'Categoría Media / Estándar'
+        
+        -- Caso 3: Rango Bajo
+        WHEN col_num_A < 500 THEN 'Categoría Baja / Basic'
+        
+        -- Caso por defecto (Manejo de errores o nulos)
+        ELSE 'Sin Clasificar'
+    END AS etiqueta_segmento
+
+FROM Tabla_General;
+
+-------------------------------------------------------------------------------
+-- E. ANÁLISIS TEMPORAL (Agrupar datos por Mes, Año, Día, Hora.)
+
+SELECT 
+    -- Extraer el AÑO
+    DATEPART(YEAR, col_fecha) AS anio,
+    
+    -- Extraer el MES (1-12)
+    DATEPART(MONTH, col_fecha) AS mes,
+    
+    -- Extraer nombre del DÍA (Opcional, depende de configuración de idioma)
+    DATENAME(WEEKDAY, col_fecha) AS nombre_dia,
+
+    -- Métrica a analizar
+    SUM(col_num_A) AS total_periodo
+
+FROM Tabla_General
+GROUP BY 
+    DATEPART(YEAR, col_fecha), 
+    DATEPART(MONTH, col_fecha),
+    DATENAME(WEEKDAY, col_fecha)
+ORDER BY anio DESC, mes DESC;
+
+----------------------------------------------------------------------------
+-- F.FILTRADO POST-AGREGACIÓN (Filtrar GRUPOS, no filas)
+
+-- Ejemplo: Muéstrame solo los países que vendieron más de 1 millón
+
+SELECT 
+    col_categ, 
+    SUM(col_num_A) AS total_ventas
+FROM Tabla_General
+GROUP BY col_categ
+HAVING SUM(col_num_A) > 1000000; -- El filtro va DESPUÉS de sumar
+
+----------------------------------------------------------------------------
+-- FASE 5: GUARDAR RESULTADOS Y EXPORTAR
+-- "El Puente". Sacar los datos de SQL para llevarlos a Power BI/Tableau.
+----------------------------------------------------------------------------
+
+-- A. 5.1 CREAR VISTAS (VIEWS) 
+-- Una 'Vista' es una consulta guardada. NO ocupa espacio en disco.
+
+-- Sintaxis: CREATE VIEW [Nombre_Vista] AS [Tu Query de Análisis]
+
+CREATE VIEW Vista_Resumen_Metricas AS
+SELECT 
+    col_categ,
+    COUNT(ride_id) AS total_viajes,
+    AVG(col_num_A) AS promedio_duracion
+FROM Tabla_General
+GROUP BY col_categ;
+
+-- ¿CÓMO USARLA?
+-- Desde Power BI/Tableau: Conectas a la Base de Datos y seleccionas 'Vista_Resumen_Metricas'.
+-- Desde SQL: La tratas como si fuera una tabla normal.
+-- SELECT * FROM Vista_Resumen_Metricas;
+
+
+-----------------------------------------------------------------------------
+-- 5.2 GUARDAR EN TABLA NUEVA (SNAPSHOT) 📸
+-- 'Congela' los resultados en una tabla física real.
+-- Útil si la consulta es muy pesada y no quieres que se recalcule siempre.
+-----------------------------------------------------------------------------
+
+/*
+-- Sintaxis: SELECT [Columnas] INTO [Nueva_Tabla] FROM [Vieja_Tabla]
+
+SELECT 
+    col_categ,
+    SUM(col_num_A) AS total_ventas
+INTO Tabla_Resumen_Final -- SQL crea esta tabla automáticamente
+FROM Tabla_General
+GROUP BY col_categ;
+*/
+
+-- VENTAJAS: Es rapidísimo de leer después.
+-- DESVENTAJAS: Si la data original cambia, esta tabla NO se actualiza (queda vieja).
+
+
+-----------------------------------------------------------------------------
+-- 5.3 EXPORTACIÓN RÁPIDA (QUICK EXPORT) ⚡
+-- Cuando solo quieres el CSV para enviarlo por correo.
+-----------------------------------------------------------------------------
+
+-- EN SQL SERVER MANAGEMENT STUDIO (SSMS):
+-- 1. Ejecuta tu consulta (SELECT ...).
+-- 2. En la grilla de resultados abajo:
+--    Click Derecho -> "Save Results As..." -> Elegir CSV.
+-- 3. O Copiar con Encabezados:
+--    Click Derecho -> "Copy with Headers" -> Pegar en Excel.
