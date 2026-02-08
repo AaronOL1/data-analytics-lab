@@ -7,10 +7,18 @@
 */
 --ESTRUCTURA PRINCIPAL 
 SELECT
+    columna_original,
+    FORMULA(columna) AS mi_apodo_nuevo --Se pueden poner apodos a las columnas
 FROM
 WHERE
+    columna_original > 100 -- SOLO COLUMNA ORIGINAL --Aquí NO va la fórmula NI el apodo nuevo.
 GROUP BY
+    columna_original,
+    FORMULA(columna) -- <--- ¡OJO! Aquí va la fórmula, NO el apodo.
+HAVING -- Filtra los GRUPOS que se crearon arriba
+    COUNT(id) > 50 -- Si se pueden usar apodos y fórmulas
 ORDER BY
+    mi_apodo_nuevo DESC; --SI se puede colocar apodos
 --------------------------------------------------------------------------
 -- 🏗️ FASE 1: CONSTRUCCIÓN (DDL - Data Definition)
 -- Antes de analizar, hay que crear el espacio.
@@ -424,3 +432,97 @@ GROUP BY col_categ;
 --    Click Derecho -> "Save Results As..." -> Elegir CSV.
 -- 3. O Copiar con Encabezados:
 --    Click Derecho -> "Copy with Headers" -> Pegar en Excel.
+
+-----------------------------------------------------------------------------
+
+
+/* =============================================================================
+🚀 SECCIÓN 6: HERRAMIENTAS AVANZADAS (ADVANCED TOOLKIT)
+"Las armas secretas del Senior". Para cuando el GROUP BY no es suficiente.
+============================================================================= */
+
+-----------------------------------------------------------------------------
+-- 6.1 WINDOW FUNCTIONS (OVER + PARTITION BY) 🪟
+-- ¿EL PROBLEMA? El GROUP BY "aplasta" las filas (pierdes el detalle).
+-- ¿LA SOLUCIÓN? Window Functions te dejan calcular totales SIN aplastar las filas.
+-- ÚSALO PARA: % del total, Rankings, Comparar fila vs promedio.
+-----------------------------------------------------------------------------
+
+/*
+SINTAXIS: 
+FUNCION(columna) OVER (PARTITION BY grupo ORDER BY orden)
+*/
+
+-- EJEMPLO: ¿Qué porcentaje representa este viaje del total de SU grupo?
+/*
+SELECT 
+    day_of_week,
+    ride_id, -- Mantenemos el detalle (la fila no se borra)
+    
+    -- Columna Mágica:
+    COUNT(ride_id) OVER (PARTITION BY day_of_week) as total_del_dia,
+    
+    -- Cálculo directo (Fila / Total del Grupo):
+    100.0 * ride_id / COUNT(ride_id) OVER (PARTITION BY day_of_week) as pct_del_dia
+
+FROM Cyclistic_Final;
+*/
+
+
+-----------------------------------------------------------------------------
+-- 6.2 COMMON TABLE EXPRESSIONS (CTEs - WITH AS) 🧩
+-- ¿EL PROBLEMA? Tu consulta es un monstruo gigante y te pierdes.
+-- ¿LA SOLUCIÓN? "Divide y Vencerás". Creas tablas temporales en memoria.
+-- ÚSALO PARA: Calcular algo primero (ej. Totales) y luego usar ese dato.
+-----------------------------------------------------------------------------
+
+/*
+SINTAXIS:
+WITH Nombre_Temporal AS (
+    -- Consulta 1 (La Preparación)
+    SELECT ...
+),
+Nombre_Temporal_2 AS (
+    -- Consulta 2 (Opcional)
+    SELECT ...
+)
+-- Consulta Final (El Resultado)
+SELECT * FROM Nombre_Temporal
+*/
+
+-- EJEMPLO: Calcular crecimiento (Max vs Min) limpiamente.
+/*
+WITH Mis_Datos_Mensuales AS (
+    -- Paso 1: Primero calculo los totales por mes (La "Pre-Cocina")
+    SELECT 
+        member_casual,
+        MONTH(started_at) as mes,
+        COUNT(ride_id) as total_viajes
+    FROM Cyclistic_Final
+    GROUP BY member_casual, MONTH(started_at)
+)
+-- Paso 2: Ahora uso esa tabla limpia para hacer matemáticas (El "Plato Final")
+SELECT 
+    member_casual,
+    MAX(total_viajes) - MIN(total_viajes) as diferencia_pico_valle
+FROM Mis_Datos_Mensuales
+GROUP BY member_casual;
+*/
+
+-----------------------------------------------------------------------------
+-- 6.3 RANKING (Top N) 🏆
+-- ¿Quiénes son los Top 3 de cada categoría?
+-----------------------------------------------------------------------------
+
+/*
+SELECT * FROM (
+    SELECT 
+        station_name,
+        COUNT(*) as viajes,
+        -- Crea un ranking (1, 2, 3...) reiniciando en cada grupo
+        RANK() OVER (PARTITION BY member_casual ORDER BY COUNT(*) DESC) as ranking
+    FROM Cyclistic_Final
+    GROUP BY station_name, member_casual
+) as Tabla_Ranking
+WHERE ranking <= 3; -- Filtrar solo el Top 3
+*/
