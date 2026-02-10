@@ -26,7 +26,7 @@ ORDER BY
 
 -- 1. CREAR BASES DE DATOS 
 -- Siempre revisa si existe antes de crear para no borrar nada por error.
-IF NOT EXIST (SELECT * FROM sys.database WHERE name='Nombre_DB')
+IF NOT EXISTS (SELECT * FROM sys.database WHERE name='Nombre_DB')
 BEGIN
     CREATE DATABASE Nombre_DB;
 END
@@ -157,7 +157,7 @@ SELECT REPLACE (var1, '-','') FROM Tabla_Maestra; -- '-' se puede cambiar por cu
 -- Si tienes un código var1="ABC-123" 
 
     SELECT LEFT(var1, 3) FROM Productos; -- Seleciona los 3 caracteres de la IZQUIERDA
---  "      RIGTH(var1,4) "       "     ; -- Seleciona los 4 caracteres de la DERECHA
+--  "      RIGHT(var1, 4) "       "     ; -- Seleciona los 4 caracteres de la DERECHA
 --  SELECT SUBSTRING(Columna, POSICION_INICIAL, LONGITUD)
 -- Ejemplo SUBSTRING- 
 SELECT SUBSTRING('ABC-123-XYZ', 5, 3); -- Desde la posición 5 selecciona 3 valores.
@@ -246,6 +246,7 @@ WHERE estado = 'Entregado' AND fecha_entrega IS NULL;
 SELECT * FROM Tabla_Clientes
 WHERE tipo_cliente = 'VIP' AND total_compras < 100;
 
+
 ---------------------------------------------------------------------------
 /*
 FASE 4: ANÁLISIS, MATEMÁTICAS Y AGREGACIÓN
@@ -260,6 +261,7 @@ col_num_B: Otra métrica numérica (Ej: Costos, Gastos, Tiempo).
 col_fecha: Una fecha (Ej: Fecha de Transacción).
 */
 ---------------------------------------------------------------------------
+
 -- A. MATEMÁTICAS DE FILA (peraciones entre columnas de la MISMA fila. No agrupan, solo calculan.)
 SELECT
     col_categ,
@@ -404,9 +406,7 @@ GROUP BY col_categ;
 -- 5.2 GUARDAR EN TABLA NUEVA (SNAPSHOT) 📸
 -- 'Congela' los resultados en una tabla física real.
 -- Útil si la consulta es muy pesada y no quieres que se recalcule siempre.
------------------------------------------------------------------------------
 
-/*
 -- Sintaxis: SELECT [Columnas] INTO [Nueva_Tabla] FROM [Vieja_Tabla]
 
 SELECT 
@@ -415,16 +415,13 @@ SELECT
 INTO Tabla_Resumen_Final -- SQL crea esta tabla automáticamente
 FROM Tabla_General
 GROUP BY col_categ;
-*/
 
 -- VENTAJAS: Es rapidísimo de leer después.
 -- DESVENTAJAS: Si la data original cambia, esta tabla NO se actualiza (queda vieja).
 
-
------------------------------------------------------------------------------
+----------------------------------------------------------------------------
 -- 5.3 EXPORTACIÓN RÁPIDA (QUICK EXPORT) ⚡
 -- Cuando solo quieres el CSV para enviarlo por correo.
------------------------------------------------------------------------------
 
 -- EN SQL SERVER MANAGEMENT STUDIO (SSMS):
 -- 1. Ejecuta tu consulta (SELECT ...).
@@ -433,18 +430,16 @@ GROUP BY col_categ;
 -- 3. O Copiar con Encabezados:
 --    Click Derecho -> "Copy with Headers" -> Pegar en Excel.
 
+
+/* 
 -----------------------------------------------------------------------------
-
-
-/* =============================================================================
 🚀 SECCIÓN 6: HERRAMIENTAS AVANZADAS (ADVANCED TOOLKIT)
 "Las armas secretas del Senior". Para cuando el GROUP BY no es suficiente.
-============================================================================= */
+============================================================================= 
+*/
 
 -----------------------------------------------------------------------------
--- 6.1 WINDOW FUNCTIONS (OVER + PARTITION BY) 🪟
--- ¿EL PROBLEMA? El GROUP BY "aplasta" las filas (pierdes el detalle).
--- ¿LA SOLUCIÓN? Window Functions te dejan calcular totales SIN aplastar las filas.
+-- 6.1 FUNCIÓN VENTANAS (OVER + PARTITION BY) 🪟
 -- ÚSALO PARA: % del total, Rankings, Comparar fila vs promedio.
 -----------------------------------------------------------------------------
 
@@ -454,30 +449,21 @@ FUNCION(columna) OVER (PARTITION BY grupo ORDER BY orden)
 */
 
 -- EJEMPLO: ¿Qué porcentaje representa este viaje del total de SU grupo?
-/*
+
 SELECT 
     day_of_week,
-    ride_id, -- Mantenemos el detalle (la fila no se borra)
-    
-    -- Columna Mágica:
-    COUNT(ride_id) OVER (PARTITION BY day_of_week) as total_del_dia,
-    
-    -- Cálculo directo (Fila / Total del Grupo):
-    100.0 * ride_id / COUNT(ride_id) OVER (PARTITION BY day_of_week) as pct_del_dia
+    ride_id,   
+    COUNT(ride_id) OVER (PARTITION BY day_of_week) as total_del_dia, -- Aqui se aplica
+    100.0 * COUNT(ride_id) / SUM(COUNT(ride_id)) OVER (PARTITION BY day_of_week) as pct_del_dia
 
 FROM Cyclistic_Final;
-*/
-
 
 -----------------------------------------------------------------------------
--- 6.2 COMMON TABLE EXPRESSIONS (CTEs - WITH AS) 🧩
--- ¿EL PROBLEMA? Tu consulta es un monstruo gigante y te pierdes.
--- ¿LA SOLUCIÓN? "Divide y Vencerás". Creas tablas temporales en memoria.
+-- 6.2 CREAR TABLAS TEMPORALES(CTEs - WITH AS) 🧩
 -- ÚSALO PARA: Calcular algo primero (ej. Totales) y luego usar ese dato.
 -----------------------------------------------------------------------------
 
-/*
-SINTAXIS:
+-- SINTAXIS:
 WITH Nombre_Temporal AS (
     -- Consulta 1 (La Preparación)
     SELECT ...
@@ -488,10 +474,9 @@ Nombre_Temporal_2 AS (
 )
 -- Consulta Final (El Resultado)
 SELECT * FROM Nombre_Temporal
-*/
 
 -- EJEMPLO: Calcular crecimiento (Max vs Min) limpiamente.
-/*
+
 WITH Mis_Datos_Mensuales AS (
     -- Paso 1: Primero calculo los totales por mes (La "Pre-Cocina")
     SELECT 
@@ -507,22 +492,3 @@ SELECT
     MAX(total_viajes) - MIN(total_viajes) as diferencia_pico_valle
 FROM Mis_Datos_Mensuales
 GROUP BY member_casual;
-*/
-
------------------------------------------------------------------------------
--- 6.3 RANKING (Top N) 🏆
--- ¿Quiénes son los Top 3 de cada categoría?
------------------------------------------------------------------------------
-
-/*
-SELECT * FROM (
-    SELECT 
-        station_name,
-        COUNT(*) as viajes,
-        -- Crea un ranking (1, 2, 3...) reiniciando en cada grupo
-        RANK() OVER (PARTITION BY member_casual ORDER BY COUNT(*) DESC) as ranking
-    FROM Cyclistic_Final
-    GROUP BY station_name, member_casual
-) as Tabla_Ranking
-WHERE ranking <= 3; -- Filtrar solo el Top 3
-*/
