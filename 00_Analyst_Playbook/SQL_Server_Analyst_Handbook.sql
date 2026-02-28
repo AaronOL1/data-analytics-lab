@@ -68,9 +68,10 @@ DROP TABLE IF EXISTS Tabla_Padre; -- Eliminta al tabla (si existe)
 BULK INSERT Tabla_Padre  --EN DONDE VOY A INSERTAR
 FROM 'C:\Ruta\MiArchivo.csv'
 WITH (
+    FORMAT = 'CSV',         --Formato del archivo
     FIRSTROW = 2,           --Inicia importando desde fila 2 
     FIELDTERMINATOR = ',',  --Separa datos por 'comas' (,)
-    ROWTERMINATOR = '0X0a' --Salto de Línea (ENTER)
+    ROWTERMINATOR = '0X0a'  --Salto de Línea (ENTER)
 --- Nota: '0x0a'→ Común en archivos generdos en Linux/Unix 
 --         '\n' → A veces funciona este (formato texto)
 --        '\r\n'→ Carriage Return + Line Feed - El estándar clásico de Windows        
