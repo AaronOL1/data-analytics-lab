@@ -72,6 +72,7 @@ WITH (
     FIRSTROW = 2,           --Inicia importando desde fila 2 
     FIELDTERMINATOR = ',',  --Separa datos por 'comas' (,)
     ROWTERMINATOR = '0X0a'  --Salto de Línea (ENTER)
+    CODEPAGE = '65001'
 --- Nota: '0x0a'→ Común en archivos generdos en Linux/Unix 
 --         '\n' → A veces funciona este (formato texto)
 --        '\r\n'→ Carriage Return + Line Feed - El estándar clásico de Windows        
